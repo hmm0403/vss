@@ -3,7 +3,6 @@
 
 _COM_SMARTPTR_TYPEDEF(IVssAsync, __uuidof(IVssAsync)); // typedef _com_ptr_t<...> IVssAsyncPtr;
 
-
 void VssClient::CreateSnapshotSet(vector<wstring> volumeList)
 {
     FunctionTracer ft(DBG_INFO);

@@ -1,12 +1,7 @@
 #pragma once
-
-
 /////////////////////////////////////////////////////////////////////////
 //  utility macros
 //
-
-
-
 #define GEN_EVAL(X) X
 #define GEN_STRINGIZE_ARG(X) #X
 #define GEN_STRINGIZE(X) GEN_EVAL(GEN_STRINGIZE_ARG(X))
@@ -17,34 +12,21 @@
 
 #define __WFILE__ GEN_MAKE_W(GEN_EVAL(__FILE__))
 #define __WFUNCTION__ GEN_MAKE_W(GEN_EVAL(__FUNCTION__))
-
-
-
-
 // Helper macros to print a GUID using printf-style formatting
 #define WSTR_GUID_FMT  L"{%.8x-%.4x-%.4x-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x}"
-
 #define GUID_PRINTF_ARG( X )                                \
     (X).Data1,                                              \
     (X).Data2,                                              \
     (X).Data3,                                              \
     (X).Data4[0], (X).Data4[1], (X).Data4[2], (X).Data4[3], \
     (X).Data4[4], (X).Data4[5], (X).Data4[6], (X).Data4[7]
-
-
 // Helper macro for quick treatment of case statements for error codes
 #define CHECK_CASE_FOR_CONSTANT(value)                      \
     case value: return wstring(GEN_MAKE_W(#value));
-
-
 #define BOOL2TXT(b) ((b)? L"TRUE": L"FALSE")
-
-
-
 
 // Max buffer size for logging/tracing 
 const int MAX_VPRINTF_BUFFER_SIZE = 4096;
-
 
 // Generic macro for variable parameter expansion
 // Safely truncate the expansion if the buffer is not big enough
@@ -64,16 +46,11 @@ const int MAX_VPRINTF_BUFFER_SIZE = 4096;
     va_end( marker );                               \
 }
 
-
 // Macro that express the position in the source file (provided for better tracing)
 #define DBG_INFO        __WFILE__ , __LINE__, __WFUNCTION__
 
-
-
-//
 //  Very simple ASSERT definition
 //
-
 #ifdef _DEBUG
     #define _ASSERTE(x) {                               \
         if (!(x))                                       \
@@ -88,12 +65,8 @@ const int MAX_VPRINTF_BUFFER_SIZE = 4096;
     #define _ASSERTE(x)
 #endif
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 //  Error-treatment macros
-//
-
 //
 //  Macro to execute a COM API and to test its result. 
 //  - The macro will execute the call given in its parameter
@@ -106,7 +79,6 @@ const int MAX_VPRINTF_BUFFER_SIZE = 4096;
 //  - Sample Usage: CHECK_COM( CoCreateInstance() )
 //
 #define CHECK_COM( Call ) CHECK_COM_ERROR( Call, #Call )
-
 
 #define CHECK_COM_ERROR( ErrorCode, Text )                                                  \
 {                                                                                           \
@@ -121,8 +93,6 @@ const int MAX_VPRINTF_BUFFER_SIZE = 4096;
         throw(hrInternal);                                                                  \
     }                                                                                       \
 }
-
-
 //
 //  Macro to execute a Win32 API and to test its result. 
 //  - The macro will execute the call given in its parameter

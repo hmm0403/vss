@@ -5,7 +5,6 @@
 
 
 ///////////////////////////////////////////////////////////////////
-//
 //  Main routine
 //
 //  Default return values:
@@ -52,7 +51,6 @@ extern "C" int __cdecl wmain(__in int argc, __in_ecount(argc) WCHAR ** argv)
     }
 }
 
-
 // Verify that OS version is supported
 bool OSVersionCheck()
 {
@@ -61,17 +59,14 @@ bool OSVersionCheck()
     return !bIsWin8;
 }
 
-
 // Print logo
 void PrintLogo()
 {
     FunctionTracer ft(DBG_INFO);
     ft.WriteInfoLine(
         L"ShadowRun.exe (Volume Shadow Copy Runner) version " VER_PRODUCTVERSION_STR ".\n"
-        L"Copyright (C) 2022 Albertony. All rights reserved.\n"
     );
 }
-
 
 //  Prints the command line options
 void PrintUsage(bool startWithNewline)
@@ -105,20 +100,17 @@ void PrintUsage(bool startWithNewline)
     );
 }
 
-
 // Constructor
 CommandLineParser::CommandLineParser()
 {
     FunctionTracer ft(DBG_INFO);
 }
 
-
 // Destructor
 CommandLineParser::~CommandLineParser()
 {
     FunctionTracer ft(DBG_INFO);
 }
-
 
 int CommandLineParser::Run(vector<wstring>& arguments)
 {
@@ -275,7 +267,7 @@ int CommandLineParser::MainRoutine(vector<wstring>& arguments)
         // Enumerate each argument
         for(size_t argIndex = 0; argIndex < arguments.size(); ++argIndex)
         {
-            //
+            /////////////////////////////////////////////////////////////
             //  Flags
             //
 
@@ -323,7 +315,6 @@ int CommandLineParser::MainRoutine(vector<wstring>& arguments)
                 ft.WriteDebugLine(L"- Program errors will be reported with exit codes starting at %d", errorCodeStart);
                 continue;
             }
-
             // Check for the environment option
             if (MatchArgument(arguments[argIndex], L"env"))
             {

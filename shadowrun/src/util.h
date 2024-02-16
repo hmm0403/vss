@@ -6,13 +6,10 @@
 // COM interface smart pointer types (_com_ptr_t)
 _COM_SMARTPTR_TYPEDEF(IVssBackupComponents, __uuidof(IVssBackupComponents)); // typedef _com_ptr_t<...> IVssBackupComponentsPtr;
 _COM_SMARTPTR_TYPEDEF(IVssBackupComponentsEx4, __uuidof(IVssBackupComponentsEx4)); // typedef _com_ptr_t<...> IVssBackupComponentsEx4Ptr;
-
-
 //for IsUNCPath method
 #define     UNC_PATH_PREFIX1        (L"\\\\?\\UNC\\")
 #define     NONE_UNC_PATH_PREFIX1   (L"\\\\?\\")
 #define     UNC_PATH_PREFIX2        (L"\\\\")
-
 
 /////////////////////////////////////////////////////////////////////////
 //  Utility classes 
@@ -28,9 +25,7 @@ public:
     ~CAutoComPointer() { CoTaskMemFree(m_ptr); }
 private:
     LPVOID m_ptr;
-    
 };
-
 
 // Used to automatically release the contents of a VSS_SNAPSHOT_PROP structure 
 // (but not the structure itself)
@@ -45,7 +40,6 @@ private:
     VSS_SNAPSHOT_PROP * m_ptr;
 };
 
-
 // Used to automatically release the given handle
 // when the instance of this class goes out of scope
 // (even if an exception is thrown)
@@ -57,7 +51,6 @@ public:
 private:
     HANDLE m_h;
 };
-
 
 // Used to automatically release the given handle
 // when the instance of this class goes out of scope
@@ -71,8 +64,6 @@ private:
     HANDLE m_h;
 };
 
-
-
 //
 //  Wrapper class to convert a wstring to/from a temporary WCHAR
 //  buffer to be used as an in/out parameter in Win32 APIs
@@ -80,41 +71,30 @@ private:
 class WString2Buffer
 {
 public:
-
-    WString2Buffer(wstring & s): 
+    WString2Buffer(wstring& s) :
         m_s(s), m_sv(s.length() + 1, L'\0')
     {
         // Move data from wstring to the temporary vector
         std::copy(m_s.begin(), m_s.end(), m_sv.begin());
     }
-
     ~WString2Buffer()
     {
         // Move data from the temporary vector to the string
         m_sv.resize(wcslen(&m_sv[0]));
         m_s.assign(m_sv.begin(), m_sv.end());
     }
-
     // Return the temporary WCHAR buffer 
     operator WCHAR* () { return &(m_sv[0]); }
-
     // Return the available size of the temporary WCHAR buffer 
     size_t length() { return m_s.length(); }
-
 private: 
     wstring &       m_s;
     vector<WCHAR>   m_sv;
 };
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////////
 //  String-related utility functions
 //
-
-
 // Converts a wstring to a string class
 inline string WString2String(wstring src)
 {
@@ -125,16 +105,12 @@ inline string WString2String(wstring src)
         chBuffer.resize(iChars);
         WideCharToMultiByte(CP_ACP, 0, src.c_str(), -1, &chBuffer.front(), (int)chBuffer.size(), NULL, NULL);
     }
-    
     return std::string(&chBuffer.front());
 }
-
-
 // Converts a wstring into a GUID
 inline GUID & WString2Guid(wstring src)
 {
     FunctionTracer ft(DBG_INFO);
-
     // Check if this is a GUID
     static GUID result;
     _bstr_t comstring(src.c_str());
@@ -144,18 +120,14 @@ inline GUID & WString2Guid(wstring src)
         ft.WriteErrorLine(L"ERROR: The string '%s' is not formatted as a GUID!", src.c_str());
         throw(E_INVALIDARG);
     }
-
     return result;
 }
-
 
 // Splits a string into a list of substrings separated by the given character
 inline vector<wstring> SplitWString(wstring str, WCHAR separator)
 {
     FunctionTracer ft(DBG_INFO);
-
     vector<wstring> strings;
-
     wstring remainder = str;
     while(true)
     {
@@ -166,31 +138,24 @@ inline vector<wstring> SplitWString(wstring str, WCHAR separator)
             strings.push_back(remainder);
             break;
         }
-
         wstring token = remainder.substr(0, position);
         ft.Trace(DBG_INFO, L"Extracting token: '%s' from '%s' between 0..%d", 
             token.c_str(), remainder.c_str(), position);
-
         // Add this substring and continue with the rest
         strings.push_back(token);
         remainder = remainder.substr(position + 1);
     }
-
     return strings;
 }
-
 
 // Converts a GUID to a wstring
 inline wstring Guid2WString(GUID guid)
 {
     FunctionTracer ft(DBG_INFO);
-
     wstring guidString(100, L'\0');
     CHECK_COM(StringCchPrintfW(WString2Buffer(guidString), guidString.length(), WSTR_GUID_FMT, GUID_PRINTF_ARG(guid)));
-
     return guidString;
 }
-
 
 // Convert the given BSTR (potentially NULL) into a valid wstring
 inline wstring BSTR2WString(BSTR bstr)
@@ -212,13 +177,11 @@ inline bool IsEqual(wstring str1, wstring str2)
 inline bool FindStringInList(wstring str, vector<wstring> stringList)
 {
     // Check to see if the volume is already added 
-    for (size_t i = 0; i < stringList.size( ); ++i)
+    for (size_t i = 0; i < stringList.size(); ++i)
         if (IsEqual(str, stringList[i]))
             return true;
-
     return false;
 }
-
 
 // Append a backslash to the current string 
 inline wstring AppendBackslash(wstring str)
@@ -244,11 +207,9 @@ inline bool IsUNCPath(_In_ VSS_PWSZ    pwszVolumeName)
         return false;
 }
 
-
 /////////////////////////////////////////////////////////////////////////
 //  Volume, File -related utility functions
 //
-
 
 // Returns TRUE if this is a real volume (for eample C:\ or C:)
 // - The backslash termination is optional
@@ -262,7 +223,6 @@ inline bool IsVolume(wstring volumePath)
     
     // If the last character is not '\\', append one
     volumePath = AppendBackslash(volumePath);
-
     if (!ClusterIsPathOnSharedVolume(volumePath.c_str()))
     {
         // Get the volume name
@@ -281,25 +241,20 @@ inline bool IsVolume(wstring volumePath)
         // Note: PathFileExists requires linking to additional dependency shlwapi.lib!
         bIsVolume = ::PathFileExists(volumePath.c_str()) == TRUE;
     }
-
     ft.Trace(DBG_INFO, L"IsVolume returns %s", (bIsVolume) ? L"TRUE" : L"FALSE");
     return bIsVolume;
 }
-
-
 
 // Get the unique volume name for the given path
 inline wstring GetUniqueVolumeNameForPath(wstring path)
 {
     FunctionTracer ft(DBG_INFO);
-
     _ASSERTE(path.length() > 0);
 
     wstring volumeRootPath(MAX_PATH, L'\0');
     wstring volumeUniqueName(MAX_PATH, L'\0');
 
     ft.Trace(DBG_INFO, L"- Get volume path name for %s", path.c_str());
-
     // Add the backslash termination, if needed
     path = AppendBackslash(path);
     if(!IsUNCPath((VSS_PWSZ)path.c_str()))
@@ -308,7 +263,6 @@ inline wstring GetUniqueVolumeNameForPath(wstring path)
         {
             DWORD cchVolumeRootPath = MAX_PATH;
             DWORD cchVolumeUniqueName = MAX_PATH;
-        
             DWORD dwRet = ClusterPrepareSharedVolumeForBackup(
                 path.c_str(),
                 WString2Buffer(volumeRootPath),
@@ -317,17 +271,14 @@ inline wstring GetUniqueVolumeNameForPath(wstring path)
                 &cchVolumeUniqueName);
 
             CHECK_WIN32_ERROR(dwRet, "ClusterPrepareSharedVolumeForBackup");
-
             ft.Trace(DBG_INFO, L"- Path name: %s", volumeRootPath.c_str());
             ft.Trace(DBG_INFO, L"- Unique volume name: %s", volumeUniqueName.c_str());
         }
         else
         {
             // Get the root path of the volume
-        
             CHECK_WIN32(GetVolumePathName((LPCWSTR)path.c_str(), WString2Buffer(volumeRootPath), (DWORD)volumeRootPath.length()));
             ft.Trace(DBG_INFO, L"- Path name: %s", volumeRootPath.c_str());
-
             // Get the unique volume name
             CHECK_WIN32(GetVolumeNameForVolumeMountPoint((LPCWSTR)volumeRootPath.c_str(), WString2Buffer(volumeUniqueName), (DWORD)volumeUniqueName.length()));
             ft.Trace(DBG_INFO, L"- Unique volume name: %s", volumeUniqueName.c_str());
@@ -357,29 +308,23 @@ inline wstring GetUniqueVolumeNameForPath(wstring path)
     return volumeUniqueName;
 }
 
-
-
 // Get the Win32 device for the volume name
 inline wstring GetDeviceForVolumeName(wstring volumeName)
 {
     FunctionTracer ft(DBG_INFO);
 
     ft.Trace(DBG_INFO, L"- GetDeviceForVolumeName for '%s'", volumeName.c_str());
-
     // The input parameter is a valid volume name
     _ASSERTE(wcslen(volumeName.c_str()) > 0);
-
     // Eliminate the last backslash, if present
     if (volumeName[wcslen(volumeName.c_str()) - 1] == L'\\')
         volumeName[wcslen(volumeName.c_str()) - 1] = L'\0';
-
     // Eliminate the GLOBALROOT prefix if present
     wstring globalRootPrefix = L"\\\\?\\GLOBALROOT";
     if (IsEqual(volumeName.substr(0,globalRootPrefix.size()), globalRootPrefix))
     {
         wstring kernelDevice = volumeName.substr(globalRootPrefix.size()); 
         ft.Trace(DBG_INFO, L"- GLOBALROOT prefix eliminated. Returning kernel device:  '%s' ", kernelDevice.c_str());
-
         return kernelDevice;
     }
 
@@ -583,4 +528,3 @@ inline wchar_t VerifyAvailableDriveLetter(wchar_t driveLetter)
     }
     return driveLetter;
 }
-
